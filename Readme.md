@@ -4,7 +4,6 @@ Networked Quiz Tournament
 ## 服务端开发
 
 Python 3.12，仅使用标准库。双方接口见 [PROTOCOL.md](PROTOCOL.md)。
-客户端由另一位组员实现，当前仓库的 tests 使用测试连接验证服务端，不能替代最终客户端联调。
 
 ```sh
 python3 server.py --host 127.0.0.1 --port 5000 --questions questions_50.json
@@ -13,6 +12,27 @@ python3 -m unittest discover -s server/tests -v
 
 启动成功输出 `SERVER_READY`；题库或参数非法时非零退出，不监听。Ctrl+C 关闭所有连接。
 同机连接使用 127.0.0.1；需要接受其他主机连接时绑定 0.0.0.0，并让客户端连接实际服务器地址。
+
+## 客户端开发
+
+`client.py` 是对应的命令行客户端，同样只用标准库和原始 TCP socket。客户端不读题库、不判定答案：
+房间状态、计时、判分和排名全部由服务端决定，它只负责登录、发送请求、展示服务端推送的事件。
+
+```sh
+python3 client.py --server 127.0.0.1 --port 5000 --id student1 --name Alice
+python3 -m unittest discover -s client/tests -v
+```
+
+进入后输入 `/help` 查看全部命令：`/quizzes`、`/rooms`、`/create <quiz_id>`、`/join <room_code>`、
+`/players`、`/ready`、`/unready`、`/start`、`/answer <A|B|C|D>`、`/score`、`/leave`、`/quit`。
+接收线程独立于输入，事件可以在任何时候打印；stdout 被重定向时不打印提示符，演示录屏/日志更干净。
+
+- `client.py`：长度前缀分帧（逐字节、粘包、跨读都能正确重组）、请求 ID 与响应匹配、事件渲染、
+  断线/协议不兼容处理、Ctrl+C 直接关连接（由服务端按掉线处理）。
+- `client/tests/test_client.py`：单元测试，覆盖分帧、信封校验、错误码、房间与答题状态、
+  排行榜与中文列宽；不打开 socket，毫秒级完成。
+- `client/tests/test_integration.py`：启动真实 `server.py` 与两个真实客户端进程，跑完整 10 题比赛，
+  并覆盖重复登录被拒、未准备不能开局、结束后不能再答等配对场景。
 
 ## 教师 Docker 环境
 
@@ -24,10 +44,11 @@ docker compose run -d --name csi201-cw1-dev python -c "import time; time.sleep(8
 docker exec -it csi201-cw1-dev python server.py --host 0.0.0.0 --port 5000 --questions questions_50.json
 ```
 
-另开终端，在同一容器运行测试或客户端（客户端完成后）：
+另开终端，在同一容器运行测试或客户端：
 
 ```sh
 docker exec csi201-cw1-dev python -m unittest discover -s server/tests -v
+docker exec csi201-cw1-dev python -m unittest discover -s client/tests -v
 docker exec -it csi201-cw1-dev python client.py --server 127.0.0.1 --port 5000 --id student1 --name Alice
 ```
 
@@ -44,7 +65,9 @@ docker exec -it csi201-cw1-dev python client.py --server 127.0.0.1 --port 5000 -
 - `server/question_bank.py`：全量题库校验，1 MB 按 1048576 字节解释；visible 字段采用可打印字符且非空字段不能全为空白。
 - `server/server.py`：selectors 单线程事件循环，独占用户/房间/计时/分数状态；非阻塞发送队列和单调时钟。
 - `server/tests/test_server.py`：分帧、题库、真实 TCP 比赛流程、超时、双房间并发和离线行为。
+- `client.py`：客户端全部实现，单文件、零依赖，可直接 `python3 client.py ...` 运行。
+- `client/tests/test_client.py`、`client/tests/test_integration.py`：客户端单元测试与真实进程配对测试。
 
 没有数据库、重连恢复、加密或账户密码；会话仅绑定本次 TCP 连接，适用于作业受控网络。
 排行榜按分数降序、用户 ID 升序；最少两人、全员准备、房主开始；详见协议。
-本机执行只算开发检查，Docker 验收、最终客户端配对测试及 Ctrl+C 演示仍需实际完成并记录。
+本机执行只算开发检查，Docker 验收、双端配对测试及 Ctrl+C 演示仍需在官方环境实际完成并记录。
