@@ -34,6 +34,7 @@ MAX_FRAME_BYTES = 65536
 CONNECT_TIMEOUT_SECONDS = 10.0
 LOGIN_TIMEOUT_SECONDS = 35.0
 LOGOUT_TIMEOUT_SECONDS = 5.0
+IO_TIMEOUT_SECONDS = 5.0
 
 USER_ID_PATTERN = re.compile(r"[A-Za-z0-9_-]{1,32}\Z")
 ROOM_CODE_PATTERN = re.compile(r"[A-Z0-9]{6}\Z")
@@ -376,7 +377,7 @@ class QuizClient:
         except OSError as exc:
             self._console.print(f"Cannot connect to {self._host}:{self._port}: {exc}")
             return 1
-        self._sock.settimeout(None)
+        self._sock.settimeout(IO_TIMEOUT_SECONDS)
         self._console.print(f"Connected to {self._host}:{self._port}.")
         self._console.print(f"Logging in as {self._name} ({self._user_id})...")
 
@@ -413,6 +414,9 @@ class QuizClient:
             while True:
                 try:
                     chunk = sock.recv(65536)
+                except socket.timeout:
+                    # Idle rooms are valid; the timeout bounds sends, not sessions.
+                    continue
                 except OSError:
                     break
                 if not chunk:
@@ -616,7 +620,7 @@ class QuizClient:
         with self._state_lock:
             self._session_id = session_id
             self._login_ok = True
-        self._console.print(f"Logged in. Session {session_id}.")
+        self._console.print("Logged in.")
         self._login_done.set()
 
     def _on_list_quizzes_response(self, payload: Dict[str, Any]) -> None:

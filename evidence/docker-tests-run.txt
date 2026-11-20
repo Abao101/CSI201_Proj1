@@ -1,0 +1,91 @@
+ Container csi201_proj1-python-run-fd5e5af8f4b2 Creating 
+ Container csi201_proj1-python-run-fd5e5af8f4b2 Created 
+
+Running server/tests
+test_complete_game_and_confidentiality (test_server.IntegrationTests.test_complete_game_and_confidentiality) ... ok
+test_deadline_missing_and_late_answer (test_server.IntegrationTests.test_deadline_missing_and_late_answer) ... ok
+test_envelope_errors_keep_connection (test_server.IntegrationTests.test_envelope_errors_keep_connection) ... ok
+test_host_transfer_and_retained_answer (test_server.IntegrationTests.test_host_transfer_and_retained_answer) ... ok
+test_identity_errors_and_disconnect_isolation (test_server.IntegrationTests.test_identity_errors_and_disconnect_isolation) ... ok
+test_network_fragmentation_and_coalescing (test_server.IntegrationTests.test_network_fragmentation_and_coalescing) ... ok
+test_room_start_rules_and_logout (test_server.IntegrationTests.test_room_start_rules_and_logout) ... ok
+test_ten_clients_two_rooms (test_server.IntegrationTests.test_ten_clients_two_rooms) ... ok
+test_transient_accept_failure_does_not_stop_server (test_server.IntegrationTests.test_transient_accept_failure_does_not_stop_server) ... WARNING:root:Accept failed: simulated aborted handshake
+ok
+test_connection_timeouts_and_queue_limit (test_server.ResourceTests.test_connection_timeouts_and_queue_limit) ... ok
+test_replacement_bank_timing_and_scoring (test_server.ResourceTests.test_replacement_bank_timing_and_scoring) ... ok
+test_sigint_releases_port_and_clients (test_server.ResourceTests.test_sigint_releases_port_and_clients) ... ok
+test_bad_frames (test_server.ValidationTests.test_bad_frames) ... ok
+test_empty_oversized_and_malformed_files (test_server.ValidationTests.test_empty_oversized_and_malformed_files) ... ok
+test_extra_members_and_schema (test_server.ValidationTests.test_extra_members_and_schema) ... ok
+test_frame_fragmentation_coalescing (test_server.ValidationTests.test_frame_fragmentation_coalescing) ... ok
+test_global_duplicate_question_id (test_server.ValidationTests.test_global_duplicate_question_id) ... ok
+test_schema_boundaries_and_missing_fields (test_server.ValidationTests.test_schema_boundaries_and_missing_fields) ... ok
+test_startup_rejects_missing_bank_and_bad_port (test_server.ValidationTests.test_startup_rejects_missing_bank_and_bad_port) ... ok
+test_teacher_bank (test_server.ValidationTests.test_teacher_bank) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 14.751s
+
+OK
+
+Running client/tests
+test_bad_port (test_client.ArgumentTests.test_bad_port) ... usage: client.py [-h] --server SERVER --port PORT --id USER_ID --name NAME
+client.py: error: --port must be between 1 and 65535
+ok
+test_bad_user_id (test_client.ArgumentTests.test_bad_user_id) ... usage: client.py [-h] --server SERVER --port PORT --id USER_ID --name NAME
+client.py: error: --id must be 1-32 ASCII letters, digits, '_' or '-'
+ok
+test_blank_name (test_client.ArgumentTests.test_blank_name) ... usage: client.py [-h] --server SERVER --port PORT --id USER_ID --name NAME
+client.py: error: --name must be 1-32 printable characters with a non-space character
+ok
+test_name_too_long (test_client.ArgumentTests.test_name_too_long) ... usage: client.py [-h] --server SERVER --port PORT --id USER_ID --name NAME
+client.py: error: --name must be 1-32 printable characters with a non-space character
+ok
+test_valid_arguments (test_client.ArgumentTests.test_valid_arguments) ... ok
+test_error_response_prints_code_and_hint (test_client.EnvelopeTests.test_error_response_prints_code_and_hint) ... ok
+test_login_response_stores_session (test_client.EnvelopeTests.test_login_response_stores_session) ... ok
+test_request_envelope_carries_session (test_client.EnvelopeTests.test_request_envelope_carries_session) ... ok
+test_request_ids_are_unique (test_client.EnvelopeTests.test_request_ids_are_unique) ... ok
+test_response_without_pending_request_is_ignored (test_client.EnvelopeTests.test_response_without_pending_request_is_ignored) ... ok
+test_unknown_event_closes_connection (test_client.EnvelopeTests.test_unknown_event_closes_connection) ... ok
+test_unknown_response_type_is_rejected (test_client.EnvelopeTests.test_unknown_response_type_is_rejected) ... ok
+test_unsupported_version_is_rejected (test_client.EnvelopeTests.test_unsupported_version_is_rejected) ... ok
+test_byte_at_a_time (test_client.FramingTests.test_byte_at_a_time) ... ok
+test_coalesced_frames (test_client.FramingTests.test_coalesced_frames) ... ok
+test_decode_rejects_duplicate_keys (test_client.FramingTests.test_decode_rejects_duplicate_keys) ... ok
+test_decode_rejects_invalid_utf8 (test_client.FramingTests.test_decode_rejects_invalid_utf8) ... ok
+test_decode_rejects_nan (test_client.FramingTests.test_decode_rejects_nan) ... ok
+test_decode_rejects_non_object (test_client.FramingTests.test_decode_rejects_non_object) ... ok
+test_encode_rejects_oversized_body (test_client.FramingTests.test_encode_rejects_oversized_body) ... ok
+test_frame_round_trip (test_client.FramingTests.test_frame_round_trip) ... ok
+test_oversized_length_is_rejected (test_client.FramingTests.test_oversized_length_is_rejected) ... ok
+test_split_across_reads (test_client.FramingTests.test_split_across_reads) ... ok
+test_zero_length_is_rejected (test_client.FramingTests.test_zero_length_is_rejected) ... ok
+test_answer_uses_open_question_id (test_client.QuestionTests.test_answer_uses_open_question_id) ... ok
+test_answer_without_question_is_local (test_client.QuestionTests.test_answer_without_question_is_local) ... ok
+test_finished_event_prints_winner (test_client.QuestionTests.test_finished_event_prints_winner) ... ok
+test_invalid_answer_letter_is_local (test_client.QuestionTests.test_invalid_answer_letter_is_local) ... ok
+test_leaderboard_marks_players_who_left (test_client.QuestionTests.test_leaderboard_marks_players_who_left) ... ok
+test_missing_answer_is_reported (test_client.QuestionTests.test_missing_answer_is_reported) ... ok
+test_prompt_shows_room_and_question (test_client.QuestionTests.test_prompt_shows_room_and_question) ... ok
+test_question_event_renders_options (test_client.QuestionTests.test_question_event_renders_options) ... ok
+test_result_clears_open_question (test_client.QuestionTests.test_result_clears_open_question) ... ok
+test_create_room_stores_view (test_client.RoomTests.test_create_room_stores_view) ... ok
+test_leave_room_clears_state (test_client.RoomTests.test_leave_room_clears_state) ... ok
+test_lowercase_room_code_is_normalised (test_client.RoomTests.test_lowercase_room_code_is_normalised) ... ok
+test_malformed_room_code_is_not_sent (test_client.RoomTests.test_malformed_room_code_is_not_sent) ... ok
+test_player_status_updates_membership (test_client.RoomTests.test_player_status_updates_membership) ... ok
+test_no_prompt_when_output_is_redirected (test_client.TableTests.test_no_prompt_when_output_is_redirected) ... ok
+test_padding_uses_display_width (test_client.TableTests.test_padding_uses_display_width) ... ok
+test_table_aligns_columns (test_client.TableTests.test_table_aligns_columns) ... ok
+test_duplicate_user_is_rejected (test_integration.IntegrationTests.test_duplicate_user_is_rejected) ... ok
+test_ten_real_clients_two_rooms_and_host_crash (test_integration.IntegrationTests.test_ten_real_clients_two_rooms_and_host_crash) ... ok
+test_two_player_match (test_integration.IntegrationTests.test_two_player_match) ... ok
+test_idle_read_timeout_keeps_connection (test_transport.TransportTests.test_idle_read_timeout_keeps_connection) ... ok
+test_nonreading_peer_cannot_block_sender_forever (test_transport.TransportTests.test_nonreading_peer_cannot_block_sender_forever) ... ok
+
+----------------------------------------------------------------------
+Ran 46 tests in 22.051s
+
+OK

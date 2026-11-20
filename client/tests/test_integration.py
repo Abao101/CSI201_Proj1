@@ -22,7 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CLIENT = str(ROOT / "client.py")
 SERVER = str(ROOT / "server.py")
-QUESTIONS = str(ROOT / "questions_50.json")
+QUESTIONS = str(ROOT / "questions.json")
 
 
 def free_port():
@@ -42,7 +42,8 @@ class Output:
         self.cond = threading.Condition(self.lock)
         self.buffer = ""
         self.eof = False
-        threading.Thread(target=self._pump, daemon=True).start()
+        self.thread = threading.Thread(target=self._pump, daemon=True)
+        self.thread.start()
 
     def _pump(self):
         try:
@@ -102,6 +103,8 @@ class ClientProcess:
         if self.process.poll() is None:
             self.process.kill()
             self.process.wait(10)
+        self.output.thread.join(10)
+        self.process.stdin.close()
         try:
             self.process.stdout.close()
         except (OSError, ValueError):
@@ -125,6 +128,7 @@ class IntegrationTests(unittest.TestCase):
         if cls.server.poll() is None:
             cls.server.kill()
             cls.server.wait(10)
+        cls.server_output.thread.join(10)
         try:
             cls.server.stdout.close()
         except (OSError, ValueError):
@@ -146,6 +150,43 @@ class IntegrationTests(unittest.TestCase):
             first.stop()
             if second is not None:
                 second.stop()
+
+    def test_ten_real_clients_two_rooms_and_host_crash(self):
+        clients = []
+        try:
+            for i in range(10):
+                c = ClientProcess(f'Player{i}', f'parallel{i}', self.port)
+                clients.append(c)
+                c.output.wait(r'Logged in\.')
+            codes = []
+            starts = []
+            for group in (clients[:5], clients[5:]):
+                host = group[0]
+                host.send('/create geography')
+                code = host.output.wait(r'Created room ([A-Z0-9]{6})').group(1)
+                codes.append(code)
+                for c in group[1:]:
+                    c.send('/join ' + code)
+                    c.output.wait(r'Joined room')
+                for c in group:
+                    c.send('/ready')
+                    c.output.wait(r'You are ready\.')
+                starts.extend(c.output.mark() for c in group)
+                host.send('/start')
+                for c in group:
+                    c.output.wait(r'Question 1/10')
+            clients[0].stop()  # Unexpected host loss during an open question.
+            for c in clients[1:]:
+                c.send('/answer A')
+            for i, c in enumerate(clients[1:], 1):
+                c.output.wait(r'Correct answer:', start=starts[i])
+                self.assertNotIn(codes[1 - i // 5], c.output.text())
+            mark = clients[1].output.mark()
+            clients[1].send('/players')
+            clients[1].output.wait(r'@\s+Player1', start=mark)
+        finally:
+            for c in clients:
+                c.stop()
 
     def test_two_player_match(self):
         bank = json.loads(Path(QUESTIONS).read_text(encoding="utf-8"))

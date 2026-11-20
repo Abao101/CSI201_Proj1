@@ -360,7 +360,11 @@ class QuizServer:
                             self.disconnect(c)
                 for key, mask in self.selector.select(0.02):
                     if key.data is None:
-                        sock, _ = self.listener.accept()
+                        try:
+                            sock, _ = self.listener.accept()
+                        except OSError as exc:
+                            logging.warning('Accept failed: %s', exc)
+                            continue
                         sock.setblocking(False)
                         c = Connection(sock, self.clock())
                         self.connections[sock] = c

@@ -9,6 +9,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -16,6 +17,8 @@ from protocol import FrameError, encode_frame, pop_frame
 from question_bank import load_questions
 from server import Connection, QuizServer
 import selectors
+import os
+import signal
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -79,7 +82,7 @@ class ValidationTests(unittest.TestCase):
             return load_questions(path)
 
     def test_teacher_bank(self):
-        self.assertEqual(sum(len(q['questions']) for q in load_questions(ROOT.parent / 'questions_50.json')), 50)
+        self.assertEqual(sum(len(q['questions']) for q in load_questions(ROOT.parent / 'questions.json')), 50)
 
     def test_extra_members_and_schema(self):
         value = bank()
@@ -99,6 +102,30 @@ class ValidationTests(unittest.TestCase):
         value['quizzes'].append(second)
         with self.assertRaises(ValueError):
             self.load(value)
+
+    def test_schema_boundaries_and_missing_fields(self):
+        for field, values in [('time_limit', [4, 61, True, '5']),
+                              ('points', [0, 1001, False]),
+                              ('text', ['', 'x' * 501]),
+                              ('question_id', ['', 'bad id'])]:
+            for value in values:
+                data = bank()
+                data['quizzes'][0]['questions'][0][field] = value
+                with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                    self.load(data)
+        for field in ('quiz_id', 'title', 'description', 'questions'):
+            data = bank()
+            del data['quizzes'][0][field]
+            with self.subTest(missing=field), self.assertRaises(ValueError):
+                self.load(data)
+
+    def test_empty_oversized_and_malformed_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'bad.json'
+            for raw in (b'', b'{' , b'\xff', b' ' * (1048576 + 1)):
+                path.write_bytes(raw)
+                with self.assertRaises(ValueError):
+                    load_questions(path)
 
     def test_frame_fragmentation_coalescing(self):
         frame = encode_frame({'text': '中文'})
@@ -121,7 +148,7 @@ class ValidationTests(unittest.TestCase):
 
     def test_startup_rejects_missing_bank_and_bad_port(self):
         for args in [('--port', '5000', '--questions', 'missing-bank.json'),
-                     ('--port', '0', '--questions', 'questions_50.json')]:
+                     ('--port', '0', '--questions', 'questions.json')]:
             run = subprocess.run([sys.executable, str(ROOT / 'server.py'), '--host', '127.0.0.1', *args],
                                  cwd=ROOT, capture_output=True, timeout=5)
             self.assertNotEqual(run.returncode, 0)
@@ -129,6 +156,81 @@ class ValidationTests(unittest.TestCase):
 
 
 class ResourceTests(unittest.TestCase):
+    def test_replacement_bank_timing_and_scoring(self):
+        data = bank()
+        for i, q in enumerate(data['quizzes'][0]['questions']):
+            q.update(points=7 + i, time_limit=5 + i, answer='D')
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'replacement.json'
+            path.write_text(json.dumps(data), encoding='utf-8')
+            quizzes = load_questions(path)
+        now = [100.0]
+        server = QuizServer('127.0.0.1', 0, quizzes, clock=lambda: now[0])
+        from server import Room
+        room = Room('ABC123', quizzes[0], 'a')
+        room.contestants = {'a': dict(name='Alice', score=0)}
+        try:
+            for i in range(5):
+                server.open_question(room)
+                self.assertEqual(room.deadline, now[0] + 5 + i)
+                room.answers['a'] = 'D'
+                server.close_question(room)
+                server.close_question(room)  # Never double-award.
+                self.assertEqual(room.contestants['a']['score'], sum(range(7, 8 + i)))
+                now[0] += 20
+            self.assertEqual(room.state, 'FINISHED')
+        finally:
+            server.close()
+
+    @unittest.skipIf(os.name == 'nt', 'Run SIGINT acceptance in official Linux Docker image')
+    def test_sigint_releases_port_and_clients(self):
+        with socket.socket() as probe:
+            probe.bind(('127.0.0.1', 0))
+            port = probe.getsockname()[1]
+        process = subprocess.Popen([sys.executable, str(ROOT.parent / 'server.py'),
+            '--host', '127.0.0.1', '--port', str(port), '--questions',
+            str(ROOT.parent / 'questions.json')], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        peer = None
+        try:
+            deadline = time.monotonic() + 5
+            while True:
+                try:
+                    peer = socket.create_connection(('127.0.0.1', port), timeout=1)
+                    break
+                except OSError:
+                    if time.monotonic() >= deadline:
+                        self.fail('Server did not start')
+                    time.sleep(0.05)
+            peer.settimeout(3)
+            # A successful connect can still be in the listener backlog. Wait
+            # for login to prove the server has accepted and owns this socket.
+            peer.sendall(encode_frame(dict(version=1, type='LOGIN_REQUEST',
+                request_id='shutdown-login', event_id=None, session_id=None,
+                payload=dict(user_id='shutdown', name='Shutdown test'))))
+            buffer = bytearray()
+            while True:
+                chunk = peer.recv(65536)
+                self.assertTrue(chunk, 'Server closed before login')
+                buffer.extend(chunk)
+                response = pop_frame(buffer)
+                if response is not None:
+                    self.assertEqual(response['type'], 'LOGIN_RESPONSE')
+                    break
+            process.send_signal(signal.SIGINT)
+            stdout, stderr = process.communicate(timeout=5)
+            self.assertEqual(process.returncode, 0, stderr)
+            self.assertIn(b'SERVER_READY', stdout)
+            self.assertEqual(peer.recv(1), b'')
+            with socket.socket() as probe:
+                probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                probe.bind(('127.0.0.1', port))
+        finally:
+            if peer:
+                peer.close()
+            if process.poll() is None:
+                process.kill()
+            process.communicate(timeout=5)
+
     def test_connection_timeouts_and_queue_limit(self):
         # No event-loop thread: a fake monotonic clock exercises exact boundaries.
         now = [0.0]
@@ -299,6 +401,21 @@ class IntegrationTests(unittest.TestCase):
                        session_id=a.session, payload={})
         a.sock.sendall(encode_frame(request) + encode_frame(dict(request, request_id='two')))
         self.assertEqual([a.receive()['request_id'], a.receive()['request_id']], ['one', 'two'])
+
+    def test_transient_accept_failure_does_not_stop_server(self):
+        original = socket.socket.accept
+        calls = [0]
+
+        def fail_once(sock):
+            calls[0] += 1
+            if calls[0] == 1:
+                raise ConnectionAbortedError('simulated aborted handshake')
+            return original(sock)
+
+        with patch.object(socket.socket, 'accept', fail_once):
+            a = self.peer('after_failure')
+            self.assertEqual(a.request('LIST_ROOMS')['type'], 'LIST_ROOMS_RESPONSE')
+        self.assertTrue(self.thread.is_alive())
 
 
 if __name__ == '__main__':

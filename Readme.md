@@ -1,12 +1,28 @@
 # CSI201 Project 1
 Networked Quiz Tournament
 
+## 一次运行全部测试
+
+在 VS Code 中选择“终端 → 新建终端”，确认位于项目根目录，然后运行：
+
+```sh
+python run_tests.py
+```
+
+Linux / 官方 Docker 中使用 `python3 run_tests.py`，或在已启动的课程容器中执行
+`docker exec csi201-cw1-dev python run_tests.py`。
+需要 Python 3.12 标准库，不需要 pip 安装。测试自动启动和清理临时服务端及客户端，不需要手动先启动服务器。
+两组都显示 `OK` 且命令退出码为 0 才算通过；故意测试非法参数时显示的 error 文本是预期输出。
+Windows 跳过 Linux SIGINT 验收测试，显示 `skipped=1`；该项必须在官方 Docker 环境再运行。
+真实十客户端测试覆盖两个房间第一题及房主进程意外退出；完整十题流程另由双客户端配对测试覆盖。
+测试过程约一分钟，具体取决于电脑性能。Docker 尚未验证时，不得将本机结果写作官方环境证据。
+
 ## 服务端开发
 
 Python 3.12，仅使用标准库。双方接口见 [PROTOCOL.md](PROTOCOL.md)。
 
 ```sh
-python3 server.py --host 127.0.0.1 --port 5000 --questions questions_50.json
+python3 server.py --host 127.0.0.1 --port 5000 --questions questions.json
 python3 -m unittest discover -s server/tests -v
 ```
 
@@ -41,7 +57,7 @@ python3 -m unittest discover -s client/tests -v
 ```sh
 docker compose build
 docker compose run -d --name csi201-cw1-dev python -c "import time; time.sleep(86400)"
-docker exec -it csi201-cw1-dev python server.py --host 0.0.0.0 --port 5000 --questions questions_50.json
+docker exec -it csi201-cw1-dev python server.py --host 0.0.0.0 --port 5000 --questions questions.json
 ```
 
 另开终端，在同一容器运行测试或客户端：
