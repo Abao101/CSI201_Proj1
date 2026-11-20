@@ -1,0 +1,196 @@
+Connected to 127.0.0.1:33213.
+Logging in as Bob (student2)...
+Logged in.
+Type /help to see the available commands.
+Open rooms:
+room    quiz       host      players  state
+------  ---------  --------  -------  -----
+X6G5R3  geography  student1  1/10     LOBBY
+Joined room X6G5R3.
+Room X6G5R3 | quiz geography (Geography) | host student1 | 2/10 | LOBBY
+   player            ready
+-  ----------------  -----
+@  Alice (student1)  -
+   Bob (student2)    -
+Wait for the host to start. Use /ready when you are ready.
+[X6G5R3] room members:
+   player            ready
+-  ----------------  -----
+@  Alice (student1)  -
+   Bob (student2)    -
+[X6G5R3] room members:
+   player            ready
+-  ----------------  -----
+@  Alice (student1)  ready
+   Bob (student2)    -
+You are ready.
+[X6G5R3] room members:
+   player            ready
+-  ----------------  -----
+@  Alice (student1)  ready
+   Bob (student2)    ready
+[X6G5R3] Quiz "Geography" started: 10 questions.
+[X6G5R3] Question 1/10  GK001  (100 points, 60s)
+  Which ocean has the largest surface area on Earth?
+    A) Indian Ocean
+    B) Arctic Ocean
+    C) Atlantic Ocean
+    D) Pacific Ocean
+  Answer with /answer <A|B|C|D>
+Answer for GK001 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK001 closed. Correct answer: D.
+  You answered A: 0 points (wrong).
+Standings after GK001:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  100
+2  Bob (student2)    0
+[X6G5R3] Question 2/10  GK002  (100 points, 60s)
+  On which continent is Brazil located?
+    A) Africa
+    B) Europe
+    C) North America
+    D) South America
+  Answer with /answer <A|B|C|D>
+Answer for GK002 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK002 closed. Correct answer: D.
+  You answered A: 0 points (wrong).
+Standings after GK002:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  200
+2  Bob (student2)    0
+[X6G5R3] Question 3/10  GK004  (100 points, 60s)
+  Which line of latitude divides Earth into the Northern and Southern Hemispheres?
+    A) Tropic of Capricorn
+    B) Tropic of Cancer
+    C) Equator
+    D) Arctic Circle
+  Answer with /answer <A|B|C|D>
+Answer for GK004 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK004 closed. Correct answer: C.
+  You answered A: 0 points (wrong).
+Standings after GK004:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  300
+2  Bob (student2)    0
+[X6G5R3] Question 4/10  GK005  (100 points, 60s)
+  What is the longitude of the prime meridian?
+    A) 0 degrees
+    B) 90 degrees
+    C) 30 degrees
+    D) 180 degrees
+  Answer with /answer <A|B|C|D>
+Answer for GK005 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK005 closed. Correct answer: A.
+  You answered B: 0 points (wrong).
+Standings after GK005:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  400
+2  Bob (student2)    0
+[X6G5R3] Question 5/10  GK010  (100 points, 60s)
+  In which country is Sydney located?
+    A) New Zealand
+    B) Australia
+    C) United Kingdom
+    D) Canada
+  Answer with /answer <A|B|C|D>
+Answer for GK010 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK010 closed. Correct answer: B.
+  You answered A: 0 points (wrong).
+Standings after GK010:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  500
+2  Bob (student2)    0
+[X6G5R3] Question 6/10  GK013  (100 points, 60s)
+  In which country is the Taj Mahal located?
+    A) Nepal
+    B) India
+    C) Turkey
+    D) Thailand
+  Answer with /answer <A|B|C|D>
+Answer for GK013 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK013 closed. Correct answer: B.
+  You answered A: 0 points (wrong).
+Standings after GK013:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  600
+2  Bob (student2)    0
+[X6G5R3] Question 7/10  GK016  (100 points, 60s)
+  On which continent is the Sahara Desert located?
+    A) Africa
+    B) Europe
+    C) South America
+    D) Asia
+  Answer with /answer <A|B|C|D>
+Answer for GK016 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK016 closed. Correct answer: A.
+  You answered B: 0 points (wrong).
+Standings after GK016:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  700
+2  Bob (student2)    0
+[X6G5R3] Question 8/10  GK018  (100 points, 60s)
+  To which mountain range does Mount Everest belong?
+    A) Rocky Mountains
+    B) Alps
+    C) Himalayas
+    D) Andes
+  Answer with /answer <A|B|C|D>
+Answer for GK018 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK018 closed. Correct answer: C.
+  You answered A: 0 points (wrong).
+Standings after GK018:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  800
+2  Bob (student2)    0
+[X6G5R3] Question 9/10  GK020  (100 points, 60s)
+  Which two bodies of water are directly connected by the Suez Canal?
+    A) Mediterranean Sea and Red Sea
+    B) Black Sea and Caspian Sea
+    C) Baltic Sea and North Sea
+    D) Red Sea and Black Sea
+  Answer with /answer <A|B|C|D>
+Answer for GK020 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK020 closed. Correct answer: A.
+  You answered B: 0 points (wrong).
+Standings after GK020:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  900
+2  Bob (student2)    0
+[X6G5R3] Question 10/10  GK025  (100 points, 60s)
+  On a map with a scale of 1:100000, what actual distance does 1 cm represent?
+    A) 100 km
+    B) 1 km
+    C) 100 m
+    D) 10 km
+  Answer with /answer <A|B|C|D>
+Answer for GK025 recorded, about 60s left. It is scored when the question closes.
+[X6G5R3] GK025 closed. Correct answer: B.
+  You answered A: 0 points (wrong).
+Standings after GK025:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  1000
+2  Bob (student2)    0
+[X6G5R3] Quiz geography finished. Winner: Alice (student1) with 1000 points.
+Final leaderboard:
+#  player            score
+-  ----------------  -----
+1  Alice (student1)  1000
+2  Bob (student2)    0
+[X6G5R3] room members:
+   player          ready
+-  --------------  -----
+@  Bob (student2)  ready
+You left room X6G5R3.
+Logging out...
+Logged out.
+The server closed the connection.
